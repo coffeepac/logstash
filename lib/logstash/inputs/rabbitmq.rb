@@ -138,7 +138,10 @@ class LogStash::Inputs::RabbitMQ < LogStash::Inputs::Threadable
       @bunnyqueue.bind(@exchange, :key => @key)
 
       @bunnyqueue.subscribe({:ack => @ack}) do |data|
-        e = to_event(data[:payload], @amqpurl)
+	payload_json = JSON.parse(data[:payload].force_encoding("UTF-8"))
+	payload_json[:header] = data[:header].properties
+	payload = payload_json.to_json
+        e = to_event(payload, @amqpurl)
         if e
           queue << e
         end
