@@ -138,7 +138,14 @@ class LogStash::Inputs::RabbitMQ < LogStash::Inputs::Threadable
       @bunnyqueue.bind(@exchange, :key => @key)
 
       @bunnyqueue.subscribe({:ack => @ack}) do |data|
+      #  not all message are json, I should have known that :(
+      payload_json = Hash.new
+      begin
 	payload_json = JSON.parse(data[:payload].force_encoding("UTF-8"))
+      rescue => e
+        #  not json!  assign the whole payload val to the key 'message'
+        payload[:message] = data[:payload]
+      end
 	payload_json[:header] = data[:header].properties
 	payload = payload_json.to_json
         e = to_event(payload, @amqpurl)
