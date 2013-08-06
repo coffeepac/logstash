@@ -144,7 +144,7 @@ class LogStash::Inputs::RabbitMQ < LogStash::Inputs::Threadable
 	payload_json = JSON.parse(data[:payload].force_encoding("UTF-8"))
       rescue => e
         #  not json!  assign the whole payload val to the key 'message'
-        payload_json[:message] = data[:payload]
+        payload_json[:@message] = data[:payload]
       end
 	payload_json[:header] = data[:header].properties
 	payload = payload_json.to_json
